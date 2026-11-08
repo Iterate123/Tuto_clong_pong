@@ -1,8 +1,8 @@
+
 using UnityEngine;
 
-
 [RequireComponent(typeof(Rigidbody2D))]
-public class player : MonoBehaviour
+public class Player : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -12,7 +12,6 @@ public class player : MonoBehaviour
     [SerializeField] private GameObject harpoonPrefab;
     [SerializeField] private Transform firingPoint;
     [SerializeField] private float cooldownTime = 0.5f;
-
     
     // Components
     private Rigidbody2D rb;
@@ -30,7 +29,7 @@ public class player : MonoBehaviour
     private bool shoot;
 
     // Movement limit
-    private float screenBoundaryX = 8f;
+    private float screenBoundaryX = 8;
 
     private void Awake()
     {
@@ -64,38 +63,88 @@ public class player : MonoBehaviour
     private void FixedUpdate()
     {
         if (!GameManager.Instance.IsGameRunning()) return;
-
-        HandleMovement();
-
+        
+        // Move the player
+        Vector2 targetVelocity = new Vector2(moveDirection.x * moveSpeed, 0);
+        rb.linearVelocity = Vector2.SmoothDamp(rb.linearVelocity, targetVelocity, ref currentVelocity, smoothTime);
+        
+        // Limit the player's movement to the screen boundaries
+        LimitPlayerMovement();
+        
+        // Shoot harpoon if the shoot flag is set
         if (shoot)
         {
             ShootHarpoon();
             shoot = false;
         }
     }
-    
-    private void HandleMovement()
+
+    private void LimitPlayerMovement()
     {
-        // Calculate target position
-        Vector2 targetPosition = rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
-
-        // Clamp the target position within screen boundaries
-        targetPosition.x = Mathf.Clamp(targetPosition.x, -screenBoundaryX, screenBoundaryX);
-
-        // Smoothly move the player to the target position
-        rb.position = Vector2.SmoothDamp(rb.position, targetPosition, ref currentVelocity, smoothTime);
+        Vector3 position = transform.position;
+        position.x = Mathf.Clamp(position.x, -screenBoundaryX, screenBoundaryX);
+        transform.position = position;
     }
-
+    
     private void ShootHarpoon()
     {
-        if (harpoonPrefab != null && firingPoint != null)
+        if (!canShoot) return;
+
+        AudioManager.Instance.PlayHarpoonSound(); // Play harpoon sound
+        
+        Instantiate(harpoonPrefab, firingPoint.position, Quaternion.identity);
+        
+        // Start cooldown
+        canShoot = false;
+        Invoke(nameof(ResetCooldown), cooldownTime);
+    }
+
+    private void ResetCooldown() => canShoot = true;
+
+    private void HandleInvulnerability()
+    {
+        invulnerabilityTimer -= Time.deltaTime;
+        
+        // Blink effect
+        float blinkSpeed = 0.1f;
+        spriteRenderer.enabled = Mathf.Sin(Time.time / blinkSpeed) > 0;
+        
+        if (invulnerabilityTimer <= 0)
         {
-            Instantiate(harpoonPrefab, firingPoint.position, Quaternion.identity);
-            canShoot = false;
-            Invoke(nameof(ResetShoot), cooldownTime);
+            isInvulnerable = false;
+            spriteRenderer.enabled = true;
         }
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ball") && !isInvulnerable)
+        {
+            // Apply damage
+            TakeHit();
+        }
+    }
 
+    public void TakeHit()
+    {
+        if (isInvulnerable) return;
+        
+        // Notify the GameManager about the hit
+        GameManager.Instance.PlayerHit();
+        
+        // Start invulnerability
+        isInvulnerable = true;
+        invulnerabilityTimer = invulnerabilityDuration;
+    }
 
+    public void Reset()
+    {
+        // Reset player position and velocity
+        transform.position = new Vector3(0, transform.position.y, 0);
+        rb.linearVelocity = Vector2.zero;
+        
+        // Start invulnerability
+        isInvulnerable = true;
+        invulnerabilityTimer = invulnerabilityDuration;
+    }
 }
