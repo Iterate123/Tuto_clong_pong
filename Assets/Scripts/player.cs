@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
     private bool shoot;
 
     // Movement limit
-    private float screenBoundaryX = 8;
+    private float screenBoundaryX = 8f;
 
     private void Awake()
     {
