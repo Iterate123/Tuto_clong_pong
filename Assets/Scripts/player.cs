@@ -61,6 +61,40 @@ public class player : MonoBehaviour
             shoot = true;
     }
 
+    private void FixedUpdate()
+    {
+        if (!GameManager.Instance.IsGameRunning()) return;
+
+        HandleMovement();
+
+        if (shoot)
+        {
+            ShootHarpoon();
+            shoot = false;
+        }
+    }
+    
+    private void HandleMovement()
+    {
+        // Calculate target position
+        Vector2 targetPosition = rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
+
+        // Clamp the target position within screen boundaries
+        targetPosition.x = Mathf.Clamp(targetPosition.x, -screenBoundaryX, screenBoundaryX);
+
+        // Smoothly move the player to the target position
+        rb.position = Vector2.SmoothDamp(rb.position, targetPosition, ref currentVelocity, smoothTime);
+    }
+
+    private void ShootHarpoon()
+    {
+        if (harpoonPrefab != null && firingPoint != null)
+        {
+            Instantiate(harpoonPrefab, firingPoint.position, Quaternion.identity);
+            canShoot = false;
+            Invoke(nameof(ResetShoot), cooldownTime);
+        }
+    }
 
 
 
