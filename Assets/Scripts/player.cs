@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (!GameManager.Instance.IsGameRunning()) return;
+        //if (!GameManager.Instance.IsGameRunning()) return;
 
         HandleInput();
 
@@ -62,7 +62,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!GameManager.Instance.IsGameRunning()) return;
+        //if (!GameManager.Instance.IsGameRunning()) return;
         
         // Move the player
         Vector2 targetVelocity = new Vector2(moveDirection.x * moveSpeed, 0);
@@ -90,7 +90,7 @@ public class Player : MonoBehaviour
     {
         if (!canShoot) return;
 
-        AudioManager.Instance.PlayHarpoonSound(); // Play harpoon sound
+        //AudioManager.Instance.PlayHarpoonSound(); // Play harpoon sound
         
         Instantiate(harpoonPrefab, firingPoint.position, Quaternion.identity);
         
@@ -130,7 +130,7 @@ public class Player : MonoBehaviour
         if (isInvulnerable) return;
         
         // Notify the GameManager about the hit
-        GameManager.Instance.PlayerHit();
+        //GameManager.Instance.PlayerHit();
         
         // Start invulnerability
         isInvulnerable = true;
