@@ -45,12 +45,12 @@ public class Harpoon : MonoBehaviour
                 ball.Split();
             }
             
-            // Détruire le grapin
+            
             Destroy(gameObject);
         }
         else if (collision.CompareTag("Ceiling"))
         {
-            // Si le grapin touche le plafond, le détruire
+            
             Destroy(gameObject);
         }
     }   
