@@ -86,10 +86,10 @@ public class Ball : MonoBehaviour
 
     private void SetInitialVelocity()
     {
-        // Direction horizontale aléatoire (gauche ou droite)
+        // 随机选择水平方向：-1（向左）或 1（向右）
         float directionX = Random.Range(0, 2) * 2 - 1; // -1 ou 1
         
-        // Appliquer la vitesse horizontale et une impulsion verticale initiale
+        // 应用初始速度
         rb.linearVelocity = new Vector2(directionX * currentSpeed, jumpForce);
     }
 
@@ -100,63 +100,63 @@ public class Ball : MonoBehaviour
     /// <param name="initialVerticalVelocity">Vitesse verticale initiale</param>
     public void SetCustomVelocity(float directionX, float initialVerticalVelocity)
     {
-        // S'assurer que la direction est normalisée à -1 ou 1
+        // 给出方向
         directionX = Mathf.Sign(directionX);
         if (directionX == 0) directionX = 1; // Par défaut, aller à droite si 0
         
-        // Appliquer la vitesse avec la direction spécifiée
+        // 指定速度
         rb.linearVelocity = new Vector2(directionX * currentSpeed, initialVerticalVelocity);
     }
 
     public void Split()
     {
-        // Si la balle n'est pas de la plus petite taille, la diviser
+        // 当球被击中时，如果它不是最小的球，则分裂成两个更小的球
         if (size > 1)
         {
-            // Créer deux nouvelles balles plus petites
+            // 生成两个更小的球
             SpawnSplitBalls();
             
-            // Ajouter des points au score
+            // 计算得分：较大的球得分较少，较小的球得分更多
             int points = basePoints * (5 - size);
             GameManager.Instance.AddScore(points);
         }
         else
         {
-            // Si c'est la plus petite balle, ajouter plus de points
+            // 如果是最小的球，给予更高的分数奖励
             GameManager.Instance.AddScore(basePoints * 4);
         }
         
-        // Détruire cette balle
+        // 销毁当前球体
         Destroy(gameObject);
     }
 
     private void SpawnSplitBalls()
     {
-        // Récupérer la vitesse verticale actuelle pour les balles filles
+        // 获取当前球的垂直速度，以便在分裂时传递给新球
         float currentVerticalVelocity = rb.linearVelocity.y;
         
-        // Créer deux balles de taille inférieure qui partent dans des directions opposées
+        // 生成两个更小的球
         for (int i = 0; i < 2; i++)
         {
-            // Position légèrement décalée pour éviter la superposition
+            //创建新球的位置稍微偏离当前球的位置，以避免重叠
             Vector3 spawnPosition = transform.position;
             spawnPosition.x += (i == 0) ? -0.2f : 0.2f;
             
-            // Utiliser le GameManager pour créer une nouvelle balle
+            // 生成新球
             GameObject newBall = GameManager.Instance.SpawnBall(size - 1, spawnPosition);
             
-            // Récupérer le composant Ball de la nouvelle balle
+            // 设置新球的速度和方向
             Ball ballComponent = newBall.GetComponent<Ball>();
             if (ballComponent != null)
             {
-                // Direction horizontale: première balle à gauche, deuxième à droite
+                // 生成一个随机的水平方向：-1（向左）或 1（向右）
                 float directionX = (i == 0) ? -1f : 1f;
                 
-                // La vitesse verticale varie légèrement pour les deux balles
+                // 生成一个随机的垂直速度，确保它不会太低
                 float verticalVelocity = currentVerticalVelocity + Random.Range(-1f, 1f);
                 if (verticalVelocity < 0) verticalVelocity = 1f; // Assurer un minimum de vitesse verticale positive
                 
-                // Définir la vitesse personnalisée
+                // 设置新球的速度
                 ballComponent.SetCustomVelocity(directionX, verticalVelocity);
             }
         }
@@ -164,7 +164,7 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Rebond au contact du sol ou des murs
+        // 检查碰撞对象是否是墙壁或天花板
         if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Ceiling"))
         {
             HandleBounce(collision);
@@ -176,11 +176,11 @@ public class Ball : MonoBehaviour
 
     private void HandleBounce(Collision2D collision)
     {
-        // Déterminer si c'est un contact avec le sol
+        // 判断是否是与地面的接触（即碰撞法线指向上方）
         bool isGroundContact = false;
         foreach (ContactPoint2D contact in collision.contacts)
         {
-            // Si la normale de contact pointe vers le haut, c'est probablement le sol
+            // 检查碰撞法线的y分量是否大于0.5，表示是地面接触
             if (contact.normal.y > 0.5f)
             {
                 isGroundContact = true;
@@ -188,59 +188,59 @@ public class Ball : MonoBehaviour
             }
         }
         
-        // Si c'est un contact avec le sol, appliquer la force de saut
+        // 如果是地面接触，应用跳跃力，否则应用水平反弹
         if (isGroundContact)
         {
-            // Conserver la vélocité horizontale, mais appliquer la force de saut verticale
+            // 应用跳跃力
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
-        // Sinon, c'est un mur, inverser la direction horizontale et s'assurer que la vitesse est suffisante
+        // 如果没有地面接触，检查是否是墙壁或天花板的碰撞
         else
         {
-            // Déterminer la direction du rebond (inverse de la direction actuelle)
+            // 反转水平速度以模拟墙壁碰撞
             float dirX = rb.linearVelocity.x > 0 ? -1 : 1;
             
-            // Appliquer une vitesse horizontale minimale dans la nouvelle direction
+            // 确保水平速度不低于最小水平速度
             rb.linearVelocity = new Vector2(dirX * Mathf.Max(currentSpeed, minHorizontalSpeed), rb.linearVelocity.y);
         }
     }
 
     private void FixedUpdate()
     {
-        // Vérifier périodiquement si la balle est coincée contre un mur
+        //不断检查球是否卡住在墙壁附近
         CheckIfStuck();
         
-        // Maintenir une vitesse horizontale minimum pour éviter l'immobilité
+        // 确保水平速度不低于最小水平速度
         EnsureMinimumHorizontalSpeed();
         
-        // Limiter la position de la balle à l'écran
+        // 限制球的位置在屏幕范围内
         LimitBallPosition();
     }
 
     private void CheckIfStuck()
     {
-        // Incrémenter le timer
+        // 累积时间以检查球是否卡住
         stuckCheckTimer += Time.fixedDeltaTime;
         
-        // Vérifier périodiquement si la balle est coincée
+        // 每隔一定时间检查一次 
         if (stuckCheckTimer >= STUCK_CHECK_INTERVAL)
         {
             stuckCheckTimer = 0f;
             
-            // Si la vitesse horizontale est trop faible, la balle est peut-être coincée
+            // 检查水平速度是否低于最小水平速度
             if (Mathf.Abs(rb.linearVelocity.x) < minHorizontalSpeed)
             {
-                // Obtenir les dimensions de l'écran en unités du monde
+                //  获取屏幕宽度和球的半径
                 float screenWidth = Camera.main.orthographicSize * Camera.main.aspect;
                 float ballRadius = transform.localScale.x * 0.5f;
                 
-                // Vérifier si la balle est proche d'un mur
+                // 检查球是否靠近左墙或右墙
                 bool nearLeftWall = transform.position.x < -screenWidth + ballRadius + wallCheckDistance;
                 bool nearRightWall = transform.position.x > screenWidth - ballRadius - wallCheckDistance;
                 
                 if (nearLeftWall || nearRightWall)
                 {
-                    // Donner une impulsion horizontale dans la direction opposée au mur
+                    // 如果球靠近墙壁且水平速度过低，强制设置一个最小的水平速度以防止卡住
                     float dirX = nearLeftWall ? 1f : -1f;
                     rb.linearVelocity = new Vector2(dirX * currentSpeed, rb.linearVelocity.y);
                 }
@@ -266,36 +266,36 @@ public class Ball : MonoBehaviour
 
     private void LimitBallPosition()
     {
-        // Obtenir les dimensions de l'écran en unités du monde
+        // 获取屏幕的宽度和高度
         float screenHeight = Camera.main.orthographicSize;
         float screenWidth = screenHeight * Camera.main.aspect;
         
-        // Obtenir le rayon de la balle pour les calculs de limites
+        // 获取球的半径
         float ballRadius = transform.localScale.x * 0.5f;
         
         Vector2 position = transform.position;
         Vector2 velocity = rb.linearVelocity;
         
-        // Appliquer les limites horizontales et verticales
+        // 处理水平和垂直边界
         HandleHorizontalBoundaries(ref position, ref velocity, screenWidth, ballRadius);
         HandleVerticalBoundaries(ref position, ref velocity, screenHeight, ballRadius);
         
-        // Appliquer les changements
+        // 应用修改后的位置和速度
         transform.position = position;
         rb.linearVelocity = velocity;
     }
 
     private void HandleHorizontalBoundaries(ref Vector2 position, ref Vector2 velocity, float screenWidth, float ballRadius)
     {
-        const float OFFSET = 0.01f; // Petit décalage pour éviter de rester coincé
+        const float OFFSET = 0.01f; // 定义一个小的偏移量，以防止球卡在边界上
         
-        // Limites horizontales
+        // 限制水平边界（确保球不会离开屏幕）
         if (position.x < -screenWidth + ballRadius)
         {
             position.x = -screenWidth + ballRadius + OFFSET;
             velocity.x = Mathf.Abs(velocity.x);
             
-            // S'assurer que la vitesse est suffisante après rebond
+            // 触发反弹
             if (velocity.x < minHorizontalSpeed) velocity.x = currentSpeed;
         }
         else if (position.x > screenWidth - ballRadius)
@@ -303,20 +303,20 @@ public class Ball : MonoBehaviour
             position.x = screenWidth - ballRadius - OFFSET;
             velocity.x = -Mathf.Abs(velocity.x);
             
-            // S'assurer que la vitesse est suffisante après rebond
+            //
             if (Mathf.Abs(velocity.x) < minHorizontalSpeed) velocity.x = -currentSpeed;
         }
     }
     
     private void HandleVerticalBoundaries(ref Vector2 position, ref Vector2 velocity, float screenHeight, float ballRadius)
     {
-        const float OFFSET = 0.01f; // Petit décalage pour éviter de rester coincé
+        const float OFFSET = 0.01f; //
         
-        // Limites verticales (uniquement pour éviter que la balle ne sorte de l'écran)
+        // 检查球不要飞出边界
         if (position.y < -screenHeight + ballRadius)
         {
             position.y = -screenHeight + ballRadius + OFFSET;
-            velocity.y = jumpForce; // Appliquer la force de saut si la balle touche le bas de l'écran
+            velocity.y = jumpForce; // 
         }
         else if (position.y > screenHeight - ballRadius)
         {
