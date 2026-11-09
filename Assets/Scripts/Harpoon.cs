@@ -36,14 +36,14 @@ public class Harpoon : MonoBehaviour
     {
         if (collision.CompareTag("Ball"))
         {
-            AudioManager.Instance.PlayBubbleSound(); // Jouer le son de la bulle
+            //AudioManager.Instance.PlayBubbleSound(); // Jouer le son de la bulle
 
             // Diviser la balle en deux
-            Ball ball = collision.GetComponent<Ball>();
+            /*Ball ball = collision.GetComponent<Ball>();
             if (ball != null)
             {
                 ball.Split();
-            }
+            }*/
             
             
             Destroy(gameObject);
