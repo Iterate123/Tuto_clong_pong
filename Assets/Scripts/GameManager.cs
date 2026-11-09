@@ -14,25 +14,20 @@ public class GameManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             
-            //一旦切割球，会让球之间不再发生碰撞
+            // Configurer les layers de collision dès le démarrage du jeu
             SetupCollisionLayers();
         }
         else
         {
             Destroy(gameObject);
         }
-
-        string actualSceneName = SceneManager.GetActiveScene().name;
-        if (actualSceneName == "PangMenu")
-        {
-            Debug.LogWarning("Le GameManager ne doit pas être présent dans cette scène. Veuillez le supprimer.");
-        }
     }
     #endregion
 
     private const string BALL_LAYER_NAME = "Balls";
-    private const int BALL_LAYER = 8; // 在unity中，Layer 8通常是自定义的“Balls”层
-    private const int MAX_LEVEL = 4; // 游戏中的最大关卡数
+    private const int BALL_LAYER = 8; // Layer 8 est généralement le premier layer personnalisable dans Unity
+    private const int MAX_LEVEL = 4; // Nombre total de niveaux dans le jeu
+
     [Header("Niveau")]
     [SerializeField] private int currentLevel = 1;
     [SerializeField] private float levelTime = 120f;
@@ -46,13 +41,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject ballPrefab;
     [SerializeField] private List<Color> ballColors = new List<Color>();
 
-    // 游戏状态
+    // État du jeu
     private bool isGameRunning = false;
     private int score = 0;
     private float remainingTime;
     private int remainingLives;
 
-    // 游戏活动
+    // Événements du jeu
     public delegate void GameEvent();
     public event GameEvent OnGameStart;
     public event GameEvent OnGameOver;
@@ -99,7 +94,7 @@ public class GameManager : MonoBehaviour
 
     private void CheckLevelCompletion()
     {
-        // 检查该关卡中是否还有剩余的球，如果没有，则关卡完成
+        // Vérifier s'il reste des balles dans le niveau
         Ball[] balls = FindObjectsOfType<Ball>();
         
         if (balls.Length == 0)
@@ -175,7 +170,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // 重置玩家位置
+            // Réinitialiser la position du joueur
             Player player = FindObjectOfType<Player>();
             if (player != null)
             {
@@ -193,10 +188,10 @@ public class GameManager : MonoBehaviour
         isGameRunning = false;
         OnLevelComplete?.Invoke();
         
-        //进入下一关或者重置游戏
+        // Passer au niveau suivant ou terminer le jeu
         currentLevel++;
         
-        // 完成所有关卡后，重置到第1关
+        // Revenir au niveau 1 après avoir terminé le niveau MAX_LEVEL
         if (currentLevel > MAX_LEVEL)
         {
             currentLevel = 1;
@@ -211,11 +206,11 @@ public class GameManager : MonoBehaviour
         CleanupCurrentLevel();
         
         // Masquer le panel de fin de niveau
-        UIManager uiManager = FindObjectOfType<UIManager>();
+        /*UIManager uiManager = FindObjectOfType<UIManager>();
         if (uiManager != null)
         {
             uiManager.HideLevelCompletePanel();
-        }
+        }*/
         
         // Centrer le joueur
         CenterPlayer();
@@ -265,11 +260,13 @@ public class GameManager : MonoBehaviour
     private void RefreshBackground()
     {
         // Trouver le LevelGenerator et lui demander de mettre à jour l'arrière-plan
+        /*
         LevelGenerator levelGenerator = FindObjectOfType<LevelGenerator>();
         if (levelGenerator != null)
         {
             levelGenerator.UpdateBackground(currentLevel);
         }
+        */
     }
     
     private void SpawnBallsForLevel()
@@ -302,57 +299,7 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        // Nettoyer le niveau actuel
-        CleanupCurrentLevel();
-        
-        // Réinitialiser les variables du jeu
-        score = 0;
-        remainingTime = levelTime;
-        remainingLives = lives;
-        currentLevel = 1;
-        isGameRunning = false; // S'assurer que le jeu n'est pas en cours d'exécution pendant la réinitialisation
-        
-        // Masquer les panneaux d'UI
-        UIManager uiManager = FindObjectOfType<UIManager>();
-        if (uiManager != null)
-        {
-            uiManager.HideGameOverPanel();
-            uiManager.HideLevelCompletePanel();
-        }
-        
-        // Détruire le joueur existant s'il y en a un
-        Player existingPlayer = FindObjectOfType<Player>();
-        if (existingPlayer != null)
-        {
-            Destroy(existingPlayer.gameObject);
-        }
-        
-        // Recharger le premier niveau
-        Invoke(nameof(LoadFirstLevel), 0.5f);
-    }
-    
-    /// <summary>
-    /// Charge le premier niveau du jeu après réinitialisation
-    /// </summary>
-    private void LoadFirstLevel()
-    {
-        // Centrer le joueur
-        SpawnPlayer();
-        
-        // Réinitialiser le timer
-        remainingTime = levelTime;
-        
-        // Rafraîchir l'arrière-plan pour le niveau 1
-        RefreshBackground();
-        
-        // Générer les balles pour le niveau 1
-        SpawnBallsForLevel();
-        
-        // Démarrer le niveau
-        isGameRunning = true;
-        
-        // Notifier le début du niveau
-        OnGameStart?.Invoke();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     #endregion

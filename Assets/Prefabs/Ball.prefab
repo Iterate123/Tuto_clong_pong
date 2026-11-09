@@ -153,7 +153,7 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -171,6 +171,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a458bddda8e41794b9c2b4c7e18fb596, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ball
+  baseSpeed: 5
+  baseSize: 1
+  basePoints: 100
+  baseJumpHeight: 3
+  sizeJumpMultiplier: 0.5
+  gravityScale: 1
+  minHorizontalSpeed: 1
+  wallCheckDistance: 0.1
 --- !u!1 &7731685542469196950
 GameObject:
   m_ObjectHideFlags: 0

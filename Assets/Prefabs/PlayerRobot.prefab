@@ -174,7 +174,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   moveSpeed: 5
   smoothTime: 0.05
-  harpoonPrefab: {fileID: 0}
+  harpoonPrefab: {fileID: 9052922233955996127, guid: d416228c82d52514f8738ba791885935, type: 3}
   firingPoint: {fileID: 1741978008422462013}
   cooldownTime: 0.5
 --- !u!1 &8926582537963457071
