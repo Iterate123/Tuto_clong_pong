@@ -118,12 +118,12 @@ public class Ball : MonoBehaviour
             
             // 计算得分：较大的球得分较少，较小的球得分更多
             int points = basePoints * (5 - size);
-            GameManager.Instance.AddScore(points);
+            //GameManager.Instance.AddScore(points);
         }
         else
         {
             // 如果是最小的球，给予更高的分数奖励
-            GameManager.Instance.AddScore(basePoints * 4);
+            //GameManager.Instance.AddScore(basePoints * 4);
         }
         
         // 销毁当前球体
@@ -143,22 +143,22 @@ public class Ball : MonoBehaviour
             spawnPosition.x += (i == 0) ? -0.2f : 0.2f;
             
             // 生成新球
-            GameObject newBall = GameManager.Instance.SpawnBall(size - 1, spawnPosition);
+            //GameObject newBall = GameManager.Instance.SpawnBall(size - 1, spawnPosition);
             
             // 设置新球的速度和方向
-            Ball ballComponent = newBall.GetComponent<Ball>();
-            if (ballComponent != null)
-            {
-                // 生成一个随机的水平方向：-1（向左）或 1（向右）
-                float directionX = (i == 0) ? -1f : 1f;
+            // Ball ballComponent = newBall.GetComponent<Ball>();
+            // if (ballComponent != null)
+            // {
+            //     // 生成一个随机的水平方向：-1（向左）或 1（向右）
+            //     float directionX = (i == 0) ? -1f : 1f;
                 
-                // 生成一个随机的垂直速度，确保它不会太低
-                float verticalVelocity = currentVerticalVelocity + Random.Range(-1f, 1f);
-                if (verticalVelocity < 0) verticalVelocity = 1f; // Assurer un minimum de vitesse verticale positive
+            //     // 生成一个随机的垂直速度，确保它不会太低
+            //     float verticalVelocity = currentVerticalVelocity + Random.Range(-1f, 1f);
+            //     if (verticalVelocity < 0) verticalVelocity = 1f; // Assurer un minimum de vitesse verticale positive
                 
-                // 设置新球的速度
-                ballComponent.SetCustomVelocity(directionX, verticalVelocity);
-            }
+            //     // 设置新球的速度
+            //     ballComponent.SetCustomVelocity(directionX, verticalVelocity);
+            // }
         }
     }
 
