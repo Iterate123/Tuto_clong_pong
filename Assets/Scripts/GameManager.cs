@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             
-            // Configurer les layers de collision dès le démarrage du jeu
+            // 在游戏中配置碰撞层
             SetupCollisionLayers();
         }
         else
@@ -25,8 +25,8 @@ public class GameManager : MonoBehaviour
     #endregion
 
     private const string BALL_LAYER_NAME = "Balls";
-    private const int BALL_LAYER = 8; // Layer 8 est généralement le premier layer personnalisable dans Unity
-    private const int MAX_LEVEL = 4; // Nombre total de niveaux dans le jeu
+    private const int BALL_LAYER = 8; //在unity中，layer 8通常用于自定义层，确保在项目设置中创建了一个名为"Balls"的层，并将其分配给所有球体对象。
+    private const int MAX_LEVEL = 4; // 游戏中的最大关卡数
 
     [Header("Niveau")]
     [SerializeField] private int currentLevel = 1;
@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour
 
     private void CheckLevelCompletion()
     {
-        // Vérifier s'il reste des balles dans le niveau
+        //检查关卡是否完成：如果场上没有球，则关卡完成
         Ball[] balls = FindObjectsOfType<Ball>();
         
         if (balls.Length == 0)
@@ -170,7 +170,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Réinitialiser la position du joueur
+            // 重置玩家位置
             Player player = FindObjectOfType<Player>();
             if (player != null)
             {
@@ -188,10 +188,10 @@ public class GameManager : MonoBehaviour
         isGameRunning = false;
         OnLevelComplete?.Invoke();
         
-        // Passer au niveau suivant ou terminer le jeu
+        // 进入下一关或者重置游戏
         currentLevel++;
         
-        // Revenir au niveau 1 après avoir terminé le niveau MAX_LEVEL
+        // 完成最高级别后进入下一关
         if (currentLevel > MAX_LEVEL)
         {
             currentLevel = 1;
@@ -202,45 +202,45 @@ public class GameManager : MonoBehaviour
 
     private void LoadNextLevel()
     {
-        // Nettoyer les objets du niveau actuel
+        // 清理当前层级的物品
         CleanupCurrentLevel();
         
-        // Masquer le panel de fin de niveau
+        // 隐藏关卡完成面板
         /*UIManager uiManager = FindObjectOfType<UIManager>();
         if (uiManager != null)
         {
             uiManager.HideLevelCompletePanel();
         }*/
         
-        // Centrer le joueur
+        // 将玩家居中
         CenterPlayer();
         
-        // Réinitialiser le timer
+        // 重置定时器
         remainingTime = levelTime;
         
-        // Changer l'arrière-plan du niveau (via le LevelGenerator)
+        // 更改关卡背景
         RefreshBackground();
         
-        // Générer les balles pour le niveau
+        //生成该关卡的球
         SpawnBallsForLevel();
         
-        // Démarrer le niveau
+        // 开始关卡
         isGameRunning = true;
         
-        // Notifier le début du niveau
+        // 触发游戏开始事件
         OnGameStart?.Invoke();
     }
     
     private void CleanupCurrentLevel()
     {
-        // Détruire toutes les balles restantes
+        // 消灭所有剩余的子弹
         Ball[] balls = FindObjectsOfType<Ball>();
         foreach (Ball ball in balls)
         {
             Destroy(ball.gameObject);
         }
         
-        // Détruire tous les harpons
+        // 消灭所有剩余的鱼叉
         Harpoon[] harpoons = FindObjectsOfType<Harpoon>();
         foreach (Harpoon harpoon in harpoons)
         {
@@ -259,7 +259,7 @@ public class GameManager : MonoBehaviour
     
     private void RefreshBackground()
     {
-        // Trouver le LevelGenerator et lui demander de mettre à jour l'arrière-plan
+        // 找到LevelGenerator并更新背景 
         /*
         LevelGenerator levelGenerator = FindObjectOfType<LevelGenerator>();
         if (levelGenerator != null)
@@ -271,13 +271,13 @@ public class GameManager : MonoBehaviour
     
     private void SpawnBallsForLevel()
     {
-        // Le nombre de balles dépend du niveau actuel
+        //球的数量与当前关卡数相同
         int ballsToSpawn = currentLevel;
         
-        // Limiter le nombre maximum de balles à un niveau raisonnable
+        // 将最大子弹数量限制在合理的范围内
         if (ballsToSpawn < 1) ballsToSpawn = 1;
         
-        // Espacer les balles horizontalement
+        //水平间距球体
         float spacing = 6f / ballsToSpawn;
         float startX = -3f + spacing/2;
         
@@ -293,7 +293,7 @@ public class GameManager : MonoBehaviour
         isGameRunning = false;
         OnGameOver?.Invoke();
         
-        // Redémarrer le jeu après 2 secondes
+        // 2s后重新加载场景
         Invoke(nameof(RestartGame), 2f);
     }
 
@@ -306,7 +306,7 @@ public class GameManager : MonoBehaviour
 
     #region Accesseurs
 
-    // Getters publics pour l'UI et d'autres systèmes
+    // ui及其他系统的访问器
     public int GetScore() => score;
     public int GetLives() => remainingLives;
     public float GetRemainingTime() => remainingTime;
@@ -316,22 +316,22 @@ public class GameManager : MonoBehaviour
     #endregion
 
     /// <summary>
-    /// Configure les layers de collision du jeu pour que les balles s'ignorent entre elles
+    /// 配置游戏的碰撞层
     /// </summary>
     private void SetupCollisionLayers()
     {
-        // Obtenir l'index du layer Ball
+        // 获取球层的索引
         int ballLayer = LayerMask.NameToLayer(BALL_LAYER_NAME);
         
-        // Si le layer n'existe pas, utiliser le layer par défaut
+        // 如果该图层不在项目中，则使用默认的BALL_LAYER索引，并发出警告
         if (ballLayer == -1)
         {
             ballLayer = BALL_LAYER;
             Debug.LogWarning($"Layer '{BALL_LAYER_NAME}' non trouvé. Vous devriez créer ce layer dans les paramètres du projet.");
         }
         
-        // Configurer les balles pour qu'elles ne collisionnent pas entre elles
-        // Cela fait que le layer "Balls" ignore les collisions avec lui-même
+        // 设置球体的碰撞层，使其忽略与自身的碰撞
+        // 这使得球体不会与其他球体发生碰撞，从而避免了不必要的物理交互
         Physics2D.IgnoreLayerCollision(ballLayer, ballLayer, true);
         
         Debug.Log($"Configuration des collisions: les balles (layer {ballLayer}) s'ignorent entre elles.");
