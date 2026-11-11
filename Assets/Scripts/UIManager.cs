@@ -32,17 +32,17 @@ public class UIManager : MonoBehaviour
             return;
         }
         
-        // S'abonner aux événements du GameManager
+        // 订阅游戏事件
         SubscribeToGameEvents();
         
-        // Initialiser les écrans
+        // 初始化面板
         InitializePanels();
         
-        // Configurer les boutons
+        // 设置按钮
         SetupButtons();
         
-        // Initialiser l'UI
-        Invoke("UpdateUI", 0.1f); // Appel initial pour éviter les problèmes de timing
+        // 初始化ui
+        Invoke("UpdateUI", 0.1f); // 初始呼叫，以免出现问题
     }
     
     private void SubscribeToGameEvents()
@@ -51,7 +51,7 @@ public class UIManager : MonoBehaviour
         gameManager.OnLifeLost += UpdateLives;
         gameManager.OnGameOver += ShowGameOver;
         gameManager.OnLevelComplete += ShowLevelComplete;
-        gameManager.OnGameStart += UpdateLevel; // Ajout d'un événement pour mettre à jour le niveau
+        gameManager.OnGameStart += UpdateLevel; // 添加一个更新事件
     }
     
     private void InitializePanels()
@@ -72,14 +72,14 @@ public class UIManager : MonoBehaviour
         UpdateScore();
         UpdateLives();
         UpdateTime();
-        UpdateLevel(); // Mise à jour du texte du niveau
+        UpdateLevel(); // 级别文件更新
     }
     
     private void Update()
     {
         UpdateTime();
         
-        // Vérifier la touche de pause
+        // 检查暂停键
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
         {
             TogglePause();
@@ -138,7 +138,7 @@ public class UIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Masque le panel de fin de niveau
+    /// 隐藏最终面板关卡
     /// </summary>
     public void HideLevelCompletePanel()
     {
@@ -149,7 +149,7 @@ public class UIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Masque le panel de game over
+    /// 隐藏游戏结束面板
     /// </summary>
     public void HideGameOverPanel()
     {
@@ -173,40 +173,40 @@ public class UIManager : MonoBehaviour
     
     private void RestartGame()
     {
-        // S'assurer que le jeu n'est pas en pause
+        // 确保游戏没有暂停
         if (isPaused)
         {
             Time.timeScale = 1f;
             isPaused = false;
             
-            // Masquer le panneau de pause
+            // 隐藏游戏面板
             if (pausePanel) pausePanel.SetActive(false);
         }
         
-        // Masquer les panneaux de game over et de niveau terminé
+        // 隐藏游戏结束和关卡的提示词
         HideGameOverPanel();
         HideLevelCompletePanel();
         
-        // Appeler la fonction de redémarrage du GameManager
+        // 调用GameManager的重启功能
         gameManager.RestartGame();
         
-        // Mettre à jour l'interface utilisateur
+        // 更新用户界面
         Invoke("UpdateUI", 0.5f);
     }
     
     private void OnDestroy()
     {
-        // Se désabonner des événements pour éviter les fuites de mémoire
+        // 取消订阅功能以免用户泄露
         if (gameManager != null)
         {
             gameManager.OnScoreChanged -= UpdateScore;
             gameManager.OnLifeLost -= UpdateLives;
             gameManager.OnGameOver -= ShowGameOver;
             gameManager.OnLevelComplete -= ShowLevelComplete;
-            gameManager.OnGameStart -= UpdateLevel; // Se désabonner de l'événement de démarrage
+            gameManager.OnGameStart -= UpdateLevel; // 取消订阅启动活动
         }
         
-        // Réinitialiser le timeScale en cas de destruction
+        // 在损坏时间的情况下启动时间轴
         Time.timeScale = 1f;
     }
 }
